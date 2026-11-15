@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مشروع رقمي</title>
+<style>
+:root{
+  --bg:#080d19;--panel:#111a2d;--panel2:#192640;
+  --line:#293957;--text:#f4f6ff;--muted:#9baac4;
+  --blue:#668cff;--cyan:#42d6d0;--green:#24c98b;--red:#ff647c;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:radial-gradient(circle at 15% 5%,#17284a,transparent 35%),var(--bg);
+  color:var(--text);font-family:Tahoma,Arial,sans-serif;min-height:100vh
+}
+button,input{font:inherit}
+button{cursor:pointer}
+.topbar{
+  height:75px;padding:0 5%;display:flex;align-items:center;
+  justify-content:space-between;border-bottom:1px solid #ffffff12;
+  background:#080d19eF;position:sticky;top:0;z-index:5
+}
+.brand{display:flex;align-items:center;gap:12px;font-size:21px;font-weight:bold}
+.logo{
+  width:43px;height:43px;border-radius:14px;
+  background:linear-gradient(135deg,var(--blue),var(--cyan));
+  display:grid;place-items:center;color:#071322;font-size:23px
+}
+.btn{
+  padding:12px 17px;border-radius:12px;background:var(--panel2);
+  color:white;border:1px solid var(--line);transition:.2s
+}
+.btn:hover{transform:translateY(-2px);border-color:var(--blue)}
+.primary{background:linear-gradient(120deg,#547cff,#3dcae0);color:#071322;font-weight:bold;border:0}
+main{max-width:1050px;margin:35px auto;padding:0 18px}
+.hero{
+  padding:30px;border:1px solid var(--line);border-radius:23px;
+  background:linear-gradient(120deg,#182847,#111a2d);
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:23px
+}
+.hero h1{font-size:clamp(24px,4vw,37px);margin:0 0 10px}
+.hero p{color:var(--muted);line-height:1.8;margin:0}
+.hero-icon{font-size:65px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-bottom:22px}
+.stat,.card{
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:18px;padding:19px
+}
+.stat small{color:var(--muted)}
+.stat strong{display:block;font-size:26px;margin-top:8px}
+.quiz-card{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:25px}
+.quiz-head{display:flex;justify-content:space-between;color:var(--muted);font-size:13px}
+.progress{height:8px;background:#263653;border-radius:20px;margin:17px 0 25px;overflow:hidden}
+.progress div{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));width:0;transition:.3s}
+.question{font-size:25px;line-height:1.8;margin:0 0 20px}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.answer{
+  padding:17px;text-align:right;background:var(--panel2);
+  border:1px solid var(--line);border-radius:14px;color:white;
+  min-height:60px;transition:.2s
+}
+.answer:hover:not(:disabled){border-color:var(--blue);transform:translateY(-2px)}
+.answer.correct{border-color:var(--green);background:#123c34}
+.answer.wrong{border-color:var(--red);background:#49212e}
+.answer:disabled{cursor:default;opacity:1}
+.feedback{min-height:28px;margin:17px 0;font-weight:bold}
+.good{color:var(--green)}.bad{color:var(--red)}
+.quiz-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:15px}
+.muted{color:var(--muted);font-size:13px}
+.result-screen{display:none}
+.result-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+.result-number{background:var(--panel2);border-radius:14px;padding:17px;text-align:center}
+.result-number strong{display:block;font-size:28px;margin-bottom:6px}
+.review-item{background:var(--panel2);border:1px solid var(--line);border-radius:15px;padding:17px;margin:13px 0}
+.review-item h3{font-size:17px;line-height:1.8;margin:0 0 12px}
+.review-item p{margin:8px 0;line-height:1.7}
+.right{color:var(--green)}.wrong{color:var(--red)}
+.review-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.review-option{padding:10px;border-radius:9px;background:#101a2b;border:1px solid var(--line);font-size:14px}
+.review-option.correct-option{border-color:var(--green);background:#123c34}
+.review-option.wrong-option{border-color:var(--red);background:#49212e}
+footer{text-align:center;color:var(--muted);padding:35px;font-size:13px}
+
+/* لوحة المعلم */
+.teacher{
+  display:none;position:fixed;inset:0;background:var(--bg);
+  z-index:20;overflow:auto
+}
+.teacher-shell{min-height:100vh;display:grid;grid-template-columns:230px 1fr}
+.teacher-side{background:#0c1425;border-left:1px solid var(--line);padding:25px 15px}
+.teacher-side h2{font-size:19px;margin:5px 8px 28px}
+.side-link{
+  display:block;width:100%;text-align:right;background:transparent;
+  color:var(--muted);padding:14px;border-radius:12px;margin:5px 0
+}
+.side-link.active,.side-link:hover{background:#1b2b49;color:white}
+.teacher-main{padding:28px;max-width:1050px;width:100%;margin:auto}
+.teacher-top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:23px}
+.teacher-top h1{margin:0 0 7px}
+.teacher-top p{margin:0;color:var(--muted)}
+.section{display:none}
+.section.active{display:block}
+.teacher-box{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:20px;margin-bottom:15px}
+.field{display:grid;gap:8px;margin:14px 0}
+.field label{font-size:13px;color:var(--muted)}
+.field input,.field select{
+  width:100%;padding:13px;border:1px solid var(--line);
+  background:#0d1729;color:white;border-radius:11px;outline:none
+}
+.field input:focus,.field select:focus{border-color:var(--blue)}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 13px}
+.question-list{display:grid;gap:10px;margin-top:15px}
+.question-row{
+  background:var(--panel2);border:1px solid var(--line);
+  border-radius:13px;padding:14px;display:flex;
+  align-items:center;justify-content:space-between;gap:10px
+}
+.question-row p{margin:6px 0;color:var(--muted);font-size:13px}
+.row-actions{display:flex;gap:7px;flex-wrap:wrap}
+.small-btn{padding:8px 11px;border-radius:9px;background:#263653;color:white;border:0}
+.danger{background:#512332}
+.more-options{
+  border:1px solid var(--line);background:#0d1729;
+  border-radius:13px;padding:14px;margin-top:15px
+}
+.more-options summary{cursor:pointer;font-weight:bold;padding:5px}
+.more-content{padding-top:12px}
+.preview{background:#0d1729;border:1px dashed var(--line);padding:15px;border-radius:13px;margin-top:15px;line-height:1.8}
+.media-status{
+  margin-top:10px;padding:12px;background:#0a1220;
+  border-radius:10px;border:1px solid var(--line);
+}
+.media-status p{margin:0 0 10px;color:var(--muted);font-size:14px}
+.remove-media-btn{
+  background:#512332;color:white;border:0;
+  padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer
+}
+.login-overlay{
+  position:fixed;inset:0;background:#050914ed;z-index:30;
+  display:grid;place-items:center;padding:20px
+}
+.login-card{
+  width:min(400px,100%);padding:28px;background:var(--panel);
+  border:1px solid var(--line);border-radius:22px
+}
+.login-card h2{margin-top:0}
+.hidden{display:none!important}
+@media(max-width:750px){
+  .teacher-shell{grid-template-columns:1fr}
+  .teacher-side{border-left:0;border-bottom:1px solid var(--line);padding:12px}
+  .teacher-side h2{margin:5px 8px 10px}
+  .side-link{display:inline-block;width:auto;padding:9px}
+  .teacher-main{padding:15px}
+  .hero-icon{display:none}
+}
+@media(max-width:550px){
+  main{padding:0 11px;margin-top:18px}
+  .hero{padding:20px}
+  .stats{grid-template-columns:1fr 1fr}
+  .answers,.options-grid,.review-options{grid-template-columns:1fr}
+  .quiz-card{padding:17px}
+  .result-summary{grid-template-columns:1fr}
+  .teacher-top{align-items:flex-start;flex-direction:column}
+  .question-row{align-items:flex-start;flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><div class="logo">✦</div><span>مشروع رقمي</span></div>
+  <button class="btn primary" onclick="showLogin()">لوحة المعلم</button>
+</header>
+
+<main>
+  <section class="hero">
+    <div>
+      <h1>اختبر معلوماتك واكتشف مستواك</h1>
+      <p>أسئلة متنوعة وتحديات ممتعة، اختبر نفسك وشاهد نتيجتك في النهاية.</p>
+    </div>
+    <div class="hero-icon">🧠</div>
+  </section>
+
+  <div class="stats">
+    <div class="stat"><small>عدد الأسئلة</small><strong id="totalCount">0</strong></div>
+    <div class="stat"><small>تمت الإجابة</small><strong id="doneCount">0</strong></div>
+    <div class="stat"><small>إجابات صحيحة</small><strong id="scoreCount">0</strong></div>
+  </div>
+
+  <section class="quiz-card" id="quizScreen">
+    <div class="quiz-head">
+      <span id="questionCounter">السؤال 1</span>
+      <span>اختبار معلومات عامة</span>
+    </div>
+    <div class="progress"><div id="progressBar"></div></div>
+    <h2 class="question" id="questionText">...</h2>
+    <div id="questionMedia"></div>
+    <div class="answers" id="answers"></div>
+    <div class="feedback" id="feedback" aria-live="polite"></div>
+    <div class="quiz-footer">
+      <span class="muted">اختر إجابة واحدة فقط</span>
+      <button class="btn primary" id="nextButton" onclick="nextQuestion()" disabled>السؤال التالي ←</button>
+    </div>
+  </section>
+
+  <section class="card result-screen" id="resultScreen">
+    <h1>انتهى الاختبار! 🎉</h1>
+    <p class="muted" id="resultMessage">هذه مراجعة كاملة لإجاباتك.</p>
+    <div class="result-summary">
+      <div class="result-number"><strong id="finalScore">0/0</strong><span>النتيجة النهائية</span></div>
+      <div class="result-number"><strong id="finalCorrect">0</strong><span>إجابات صحيحة</span></div>
+      <div class="result-number"><strong id="finalWrong">0</strong><span>إجابات خاطئة</span></div>
+    </div>
+    <h2>مراجعة جميع الأسئلة والإجابات</h2>
+    <div id="reviewList"></div>
+    <button class="btn primary" onclick="restartQuiz()">↻ إعادة الاختبار</button>
+  </section>
+</main>
+
+<footer>مشروع رقمي © <span id="year"></span></footer>
+
+<!-- تسجيل دخول المعلم -->
+<div class="login-overlay hidden" id="loginOverlay">
+  <div class="login-card">
+    <h2>🔐 دخول المعلم</h2>
+    <p class="muted">أدخل كلمة المرور للوصول إلى لوحة التحكم.</p>
+    <div class="field">
+      <label>كلمة المرور</label>
+      <input id="passwordInput" type="password" placeholder="أدخل كلمة المرور">
+    </div>
+    <p id="loginError" style="color:var(--red)"></p>
+    <button class="btn primary" onclick="login()">دخول</button>
+    <button class="btn" onclick="hideLogin()">إلغاء</button>
+  </div>
+</div>
+
+<!-- لوحة المعلم -->
+<div class="teacher" id="teacherPage">
+  <div class="teacher-shell">
+    <aside class="teacher-side">
+      <h2>✦ لوحة المعلم</h2>
+      <button class="side-link active" onclick="openSection('dashboard',this)">🏠 الرئيسية</button>
+      <button class="side-link" onclick="openSection('editor',this);newQuestion()">➕ إضافة سؤال</button>
+      <button class="side-link" onclick="openSection('allQuestions',this)">📚 جميع الأسئلة</button>
+      <button class="side-link" onclick="closeTeacher()">↩ العودة للموقع</button>
+    </aside>
+
+    <div class="teacher-main">
+      <div class="teacher-top">
+        <div>
+          <h1 id="teacherHeading">الرئيسية</h1>
+          <p>إدارة الأسئلة بسهولة من مكان واحد</p>
+        </div>
+        <button class="btn" onclick="closeTeacher()">إغلاق ✕</button>
+      </div>
+
+      <section class="section active" id="dashboard">
+        <div class="teacher-box">
+          <h2>مرحبًا بك في لوحة المعلم</h2>
+          <p class="muted">أضف الأسئلة أو عدّل الأسئلة الموجودة أو احذفها بسهولة.</p>
+          <h3>عدد الأسئلة الحالي: <span id="teacherTotal">0</span></h3>
+          <button class="btn primary" onclick="newQuestion()">➕ إضافة سؤال جديد</button>
+        </div>
+      </section>
+
+      <section class="section" id="editor">
+        <div class="teacher-box">
+          <h2 id="editorHeading">إضافة سؤال جديد</h2>
+          <input type="hidden" id="editId">
+
+          <div class="field">
+            <label>اكتب السؤال هنا</label>
+            <input id="questionInput" placeholder="مثال: ما عاصمة المملكة العربية السعودية؟">
+          </div>
+
+          <h3>الخيارات الأربعة</h3>
+          <div class="options-grid">
+            <div class="field"><label>الخيار الأول</label><input id="option0" placeholder="اكتب الخيار الأول"></div>
+            <div class="field"><label>الخيار الثاني</label><input id="option1" placeholder="اكتب الخيار الثاني"></div>
+            <div class="field"><label>الخيار الثالث</label><input id="option2" placeholder="اكتب الخيار الثالث"></div>
+            <div class="field"><label>الخيار الرابع</label><input id="option3" placeholder="اكتب الخيار الرابع"></div>
+          </div>
+
+          <div class="field">
+            <label>حدد الإجابة الصحيحة</label>
+            <select id="correctOption">
+              <option value="0">الخيار الأول</option>
+              <option value="1">الخيار الثاني</option>
+              <option value="2">الخيار الثالث</option>
+              <option value="3">الخيار الرابع</option>
+            </select>
+          </div>
+
+          <details class="more-options">
+            <summary>⚙ خيارات أكثر (إضافة صورة أو صوت)</summary>
+            <div class="more-content">
+              <div class="field">
+                <label>إضافة صورة للسؤال</label>
+                <input id="imageFile" type="file" accept="image/*">
+                <div id="currentImagePreview" class="hidden"></div>
+              </div>
+              <div class="field">
+                <label>إضافة ملف صوتي للسؤال</label>
+                <input id="audioFile" type="file" accept="audio/*">
+                <div id="currentAudioPreview" class="hidden"></div>
+              </div>
+              <p class="muted">يمكنك ترك هذه الخيارات فارغة. استخدم زر الإزالة لحذف الوسائط الحالية.</p>
+            </div>
+          </details>
+
+          <div class="preview" id="editorPreview">ستظهر معاينة السؤال هنا.</div>
+
+          <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:17px">
+            <button class="btn primary" onclick="saveQuestion()">💾 حفظ السؤال</button>
+            <button class="btn" onclick="previewEditor()">معاينة السؤال</button>
+            <button class="btn" onclick="resetEditor()">تفريغ الحقول</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="allQuestions">
+        <div class="teacher-box">
+          <h2>جميع الأسئلة</h2>
+          <div class="field">
+            <label>البحث عن سؤال</label>
+            <input id="questionSearch" oninput="renderTeacherQuestions()" placeholder="اكتب جزءًا من السؤال...">
+          </div>
+          <div class="question-list" id="teacherQuestionList"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+const defaultQuestions = [
+  {
+    id: 1,
+    question: "ما أكبر كوكب في المجموعة الشمسية؟",
+    options: ["الأرض", "المشتري", "زحل", "المريخ"],
+    correct: 1
+  },
+  {
+    id: 2,
+    question: "في أي عام تم توحيد المملكة العربية السعودية؟",
+    options: ["1902", "1932", "1945", "1950"],
+    correct: 1
+  },
+  {
+    id: 3,
+    question: "ما الغاز الذي تمتصه النباتات من الهواء؟",
+    options: ["الأكسجين", "النيتروجين", "ثاني أكسيد الكربون", "الهيدروجين"],
+    correct: 2
+  },
+  {
+    id: 4,
+    question: "ما ناتج 12 × 8؟",
+    options: ["86", "92", "96", "108"],
+    correct: 2
+  },
+  {
+    id: 5,
+    question: "في أي قارة تقع مصر؟",
+    options: ["آسيا", "أفريقيا", "أوروبا", "أمريكا الجنوبية"],
+    correct: 1
+  }
+];
+
+function loadQuestions() {
+  try {
+    const saved = localStorage.getItem("digitalProjectQuestions");
+    return saved ? JSON.parse(saved) : defaultQuestions;
+  } catch (e) {
+    return defaultQuestions;
+  }
+}
+
+let questions = loadQuestions();
+let currentIndex = 0;
+let answersLog = [];
+let removeImageFlag = false;
+let removeAudioFlag = false;
+
+function persist() {
+  try {
+    localStorage.setItem("digitalProjectQuestions", JSON.stringify(questions));
+  } catch (e) {
+    alert("تعذر الحفظ. جرّب استخدام صورة أو ملف صوتي أصغر.");
+  }
+}
+
+function updateStats() {
+  const done = answersLog.filter(Boolean).length;
+  const score = answersLog.filter(a => a?.correct).length;
+  document.getElementById("totalCount").textContent = questions.length;
+  document.getElementById("doneCount").textContent = done;
+  document.getElementById("scoreCount").textContent = score;
+}
+
+function renderQuestion() {
+  if (!questions.length) {
+    document.getElementById("questionText").textContent = "لا توجد أسئلة حاليًا. يمكن للمعلم إضافة أسئلة جديدة.";
+    document.getElementById("answers").innerHTML = "";
+    document.getElementById("nextButton").disabled = true;
+    updateStats();
+    return;
+  }
+
+  const q = questions[currentIndex];
+  document.getElementById("questionCounter").textContent = `السؤال ${currentIndex + 1} من ${questions.length}`;
+  document.getElementById("questionText").textContent = q.question;
+  document.getElementById("progressBar").style.width = (currentIndex / questions.length * 100) + "%";
+  document.getElementById("feedback").textContent = "";
+  document.getElementById("feedback").className = "feedback";
+  document.getElementById("nextButton").disabled = true;
+  document.getElementById("nextButton").textContent =
+    currentIndex === questions.length - 1 ? "عرض النتيجة ←" : "السؤال التالي ←";
+
+  const media = document.getElementById("questionMedia");
+  media.innerHTML = "";
+
+  if (q.image) {
+    const img = document.createElement("img");
+    img.src = q.image;
+    img.style = "max-width:100%;max-height:240px;border-radius:13px;margin:10px 0";
+    media.appendChild(img);
+  }
+  if (q.audio) {
+    const audio = document.createElement("audio");
+    audio.src = q.audio;
+    audio.controls = true;
+    audio.style = "width:100%;margin:10px 0";
+    media.appendChild(audio);
+  }
+
+  const box = document.getElementById("answers");
+  box.innerHTML = "";
+
+  q.options.forEach((option, index) => {
+    const b = document.createElement("button");
+    b.className = "answer";
+    b.textContent = option;
+    b.onclick = () => chooseAnswer(index);
+    box.appendChild(b);
+  });
+
+  updateStats();
+}
+
+function chooseAnswer(index) {
+  if (answersLog[currentIndex]) return;
+
+  const q = questions[currentIndex];
+  const correct = index === Number(q.correct);
+  answersLog[currentIndex] = { chosen: index, correct };
+
+  document.querySelectorAll(".answer").forEach((button, i) => {
+    button.disabled = true;
+    if (i === Number(q.correct)) button.classList.add("correct");
+    else if (i === index) button.classList.add("wrong");
+  });
+
+  const feedback = document.getElementById("feedback");
+  feedback.className = "feedback " + (correct ? "good" : "bad");
+  feedback.textContent = correct
+    ? "✓ إجابة صحيحة، أحسنت!"
+    : "✕ إجابة غير صحيحة. الإجابة الصحيحة: " + q.options[q.correct];
+
+  document.getElementById("nextButton").disabled = false;
+  updateStats();
+}
+
+function nextQuestion() {
+  if (currentIndex < questions.length - 1) {
+    currentIndex++;
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  document.getElementById("quizScreen").style.display = "none";
+  document.getElementById("resultScreen").style.display = "block";
+
+  const correct = answersLog.filter(a => a?.correct).length;
+  const wrong = questions.length - correct;
+
+  document.getElementById("finalScore").textContent = correct + " / " + questions.length;
+  document.getElementById("finalCorrect").textContent = correct;
+  document.getElementById("finalWrong").textContent = wrong;
+
+  document.getElementById("resultMessage").textContent =
+    correct === questions.length
+      ? "ممتاز! أجبت عن جميع الأسئلة بشكل صحيح."
+      : "راجع إجاباتك بالأسفل وتعرّف على الإجابات الصحيحة.";
+
+  const review = document.getElementById("reviewList");
+  review.innerHTML = "";
+
+  questions.forEach((q, i) => {
+    const log = answersLog[i];
+    const item = document.createElement("div");
+    item.className = "review-item";
+
+    const title = document.createElement("h3");
+    title.textContent = (i + 1) + ". " + q.question;
+    item.appendChild(title);
+
+    const answer = document.createElement("p");
+    answer.className = log?.correct ? "right" : "wrong";
+    answer.textContent = log
+      ? "إجابتك: " + q.options[log.chosen]
+      : "إجابتك: لم تتم الإجابة";
+    item.appendChild(answer);
+
+    const correctP = document.createElement("p");
+    correctP.className = "right";
+    correctP.textContent = "الإجابة الصحيحة: " + q.options[q.correct];
+    item.appendChild(correctP);
+
+    const options = document.createElement("div");
+    options.className = "review-options";
+
+    q.options.forEach((option, j) => {
+      const choice = document.createElement("div");
+      choice.className = "review-option";
+      choice.textContent = String.fromCharCode(65 + j) + ". " + option;
+
+      if (j === Number(q.correct)) choice.classList.add("correct-option");
+      else if (log && j === log.chosen) choice.classList.add("wrong-option");
+
+      options.appendChild(choice);
+    });
+
+    item.appendChild(options);
+    review.appendChild(item);
+  });
+
+  document.getElementById("progressBar").style.width = "100%";
+}
+
+function restartQuiz() {
+  currentIndex = 0;
+  answersLog = [];
+  document.getElementById("resultScreen").style.display = "none";
+  document.getElementById("quizScreen").style.display = "block";
+  renderQuestion();
+}
+
+/* لوحة المعلم */
+function showLogin() {
+  document.getElementById("loginOverlay").classList.remove("hidden");
+  document.getElementById("passwordInput").focus();
+}
+
+function hideLogin() {
+  document.getElementById("loginOverlay").classList.add("hidden");
+}
+
+function login() {
+  if (document.getElementById("passwordInput").value === "6050") {
+    hideLogin();
+    document.getElementById("teacherPage").style.display = "block";
+    refreshTeacher();
+  } else {
+    document.getElementById("loginError").textContent = "كلمة المرور غير صحيحة.";
+  }
+}
+
+function closeTeacher() {
+  document.getElementById("teacherPage").style.display = "none";
+  // إعادة تحميل الأسئلة من التخزين عشان أي تعديل يظهر للطالب فورًا
+  questions = loadQuestions();
+  if (currentIndex >= questions.length) currentIndex = 0;
+  answersLog = [];
+  renderQuestion();
+}
+
+function openSection(id, button) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+
+  document.querySelectorAll(".side-link").forEach(b => b.classList.remove("active"));
+  if (button) button.classList.add("active");
+
+  const titles = {
+    dashboard: "الرئيسية",
+    editor: "إضافة وتعديل الأسئلة",
+    allQuestions: "جميع الأسئلة"
+  };
+
+  document.getElementById("teacherHeading").textContent = titles[id];
+
+  if (id === "allQuestions") renderTeacherQuestions();
+}
+
+function refreshTeacher() {
+  document.getElementById("teacherTotal").textContent = questions.length;
+  renderTeacherQuestions();
+}
+
+function newQuestion() {
+  resetEditor();
+  openSection("editor", document.querySelectorAll(".side-link")[1]);
+  document.getElementById("editorHeading").textContent = "إضافة سؤال جديد";
+}
+
+function editQuestion(id) {
+  const q = questions.find(x => String(x.id) === String(id));
+  if (!q) return;
+
+  resetEditor();
+  document.getElementById("editId").value = q.id;
+  document.getElementById("questionInput").value = q.question;
+
+  q.options.forEach((option, i) => {
+    document.getElementById("option" + i).value = option;
+  });
+
+  document.getElementById("correctOption").value = q.correct;
+
+  // عرض حالة الصورة بدون تحميلها (عشان ما يعلق)
+  if (q.image) {
+    const preview = document.getElementById("currentImagePreview");
+    preview.classList.remove("hidden");
+    preview.innerHTML = `
+      <div class="media-status">
+        <p>📷 صورة مرفقة حاليًا</p>
+        <button type="button" class="remove-media-btn" onclick="removeCurrentImage()">🗑️ إزالة الصورة</button>
+      </div>
+    `;
+  }
+
+  // عرض حالة الصوت بدون تحميله
+  if (q.audio) {
+    const preview = document.getElementById("currentAudioPreview");
+    preview.classList.remove("hidden");
+    preview.innerHTML = `
+      <div class="media-status">
+        <p>🔊 ملف صوتي مرفق حاليًا</p>
+        <button type="button" class="remove-media-btn" onclick="removeCurrentAudio()">🗑️ إزالة الصوت</button>
+      </div>
+    `;
+  }
+
+  openSection("editor", document.querySelectorAll(".side-link")[1]);
+  document.getElementById("editorHeading").textContent = "تعديل السؤال";
+  document.querySelector(".more-options").open = true;
+}
+
+function removeCurrentImage() {
+  removeImageFlag = true;
+  document.getElementById("currentImagePreview").classList.add("hidden");
+  document.getElementById("currentImagePreview").innerHTML = "";
+  document.getElementById("imageFile").value = "";
+}
+
+function removeCurrentAudio() {
+  removeAudioFlag = true;
+  document.getElementById("currentAudioPreview").classList.add("hidden");
+  document.getElementById("currentAudioPreview").innerHTML = "";
+  document.getElementById("audioFile").value = "";
+}
+
+function deleteQuestion(id) {
+  if (!confirm("هل تريد حذف هذا السؤال؟")) return;
+
+  questions = questions.filter(q => String(q.id) !== String(id));
+  persist();
+  refreshTeacher();
+  renderQuestion();
+}
+
+function renderTeacherQuestions() {
+  const box = document.getElementById("teacherQuestionList");
+  if (!box) return;
+
+  const search = (document.getElementById("questionSearch")?.value || "").toLowerCase();
+  box.innerHTML = "";
+
+  questions.filter(q => q.question.toLowerCase().includes(search)).forEach(q => {
+    const row = document.createElement("div");
+    row.className = "question-row";
+
+    const info = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = q.question;
+    const sub = document.createElement("p");
+    let mediaInfo = "";
+    if (q.image) mediaInfo += " 📷 صورة";
+    if (q.audio) mediaInfo += " 🔊 صوت";
+    sub.textContent = "عدد الخيارات: 4" + (mediaInfo ? " |" + mediaInfo : "");
+    info.append(title, sub);
+
+    const actions = document.createElement("div");
+    actions.className = "row-actions";
+
+    const edit = document.createElement("button");
+    edit.className = "small-btn";
+    edit.textContent = "تعديل";
+    edit.onclick = () => editQuestion(q.id);
+
+    const del = document.createElement("button");
+    del.className = "small-btn danger";
+    del.textContent = "حذف";
+    del.onclick = () => deleteQuestion(q.id);
+
+    actions.append(edit, del);
+    row.append(info, actions);
+    box.appendChild(row);
+  });
+
+  document.getElementById("teacherTotal").textContent = questions.length;
+}
+
+function resetEditor() {
+  document.getElementById("editId").value = "";
+  document.getElementById("questionInput").value = "";
+
+  for (let i = 0; i < 4; i++) {
+    document.getElementById("option" + i).value = "";
+  }
+
+  document.getElementById("correctOption").value = "0";
+  document.getElementById("imageFile").value = "";
+  document.getElementById("audioFile").value = "";
+  document.getElementById("editorPreview").textContent = "ستظهر معاينة السؤال هنا.";
+  document.getElementById("editorHeading").textContent = "إضافة سؤال جديد";
+
+  document.getElementById("currentImagePreview").classList.add("hidden");
+  document.getElementById("currentImagePreview").innerHTML = "";
+  document.getElementById("currentAudioPreview").classList.add("hidden");
+  document.getElementById("currentAudioPreview").innerHTML = "";
+
+  removeImageFlag = false;
+  removeAudioFlag = false;
+
+  document.querySelector(".more-options").open = false;
+}
+
+function previewEditor() {
+  const question = document.getElementById("questionInput").value.trim();
+  const options = [0, 1, 2, 3].map(i => document.getElementById("option" + i).value.trim());
+  document.getElementById("editorPreview").textContent =
+    "السؤال: " + (question || "لم تكتب السؤال بعد") +
+    " | الخيارات: " + options.map((x, i) => (i + 1) + ": " + (x || "فارغ")).join(" — ");
+}
+
+function readFile(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) { resolve(""); return; }
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function saveQuestion() {
+  const question = document.getElementById("questionInput").value.trim();
+  const options = [0, 1, 2, 3].map(i => document.getElementById("option" + i).value.trim());
+  const correct = Number(document.getElementById("correctOption").value);
+
+  if (!question) {
+    alert("اكتب السؤال أولًا.");
+    return;
+  }
+
+  if (options.some(x => !x)) {
+    alert("اكتب الخيارات الأربعة.");
+    return;
+  }
+
+  try {
+    const id = document.getElementById("editId").value;
+    const old = questions.find(q => String(q.id) === String(id));
+
+    const imageFile = document.getElementById("imageFile").files[0];
+    const audioFile = document.getElementById("audioFile").files[0];
+
+    let image = "";
+    let audio = "";
+
+    if (imageFile) {
+      image = await readFile(imageFile);
+    } else if (removeImageFlag) {
+      image = "";
+    } else {
+      image = old?.image || "";
+    }
+
+    if (audioFile) {
+      audio = await readFile(audioFile);
+    } else if (removeAudioFlag) {
+      audio = "";
+    } else {
+      audio = old?.audio || "";
+    }
+
+    const q = {
+      id: id ? Number(id) : Date.now(),
+      question,
+      options,
+      correct,
+      image,
+      audio
+    };
+
+    if (id) {
+      questions = questions.map(x => String(x.id) === String(id) ? q : x);
+    } else {
+      questions.push(q);
+    }
+
+    persist();
+    refreshTeacher();
+    renderQuestion();
+
+    document.getElementById("editorHeading").textContent = "تم الحفظ بنجاح ✓";
+    document.getElementById("editId").value = q.id;
+
+    // تحديث حالة الوسائط بعد الحفظ
+    if (q.image) {
+      const preview = document.getElementById("currentImagePreview");
+      preview.classList.remove("hidden");
+      preview.innerHTML = `
+        <div class="media-status">
+          <p>📷 صورة مرفقة حاليًا</p>
+          <button type="button" class="remove-media-btn" onclick="removeCurrentImage()">🗑️ إزالة الصورة</button>
+        </div>
+      `;
+    } else {
+      document.getElementById("currentImagePreview").classList.add("hidden");
+      document.getElementById("currentImagePreview").innerHTML = "";
+    }
+
+    if (q.audio) {
+      const preview = document.getElementById("currentAudioPreview");
+      preview.classList.remove("hidden");
+      preview.innerHTML = `
+        <div class="media-status">
+          <p>🔊 ملف صوتي مرفق حاليًا</p>
+          <button type="button" class="remove-media-btn" onclick="removeCurrentAudio()">🗑️ إزالة الصوت</button>
+        </div>
+      `;
+    } else {
+      document.getElementById("currentAudioPreview").classList.add("hidden");
+      document.getElementById("currentAudioPreview").innerHTML = "";
+    }
+
+    removeImageFlag = false;
+    removeAudioFlag = false;
+    document.getElementById("imageFile").value = "";
+    document.getElementById("audioFile").value = "";
+
+    alert("تم حفظ السؤال بنجاح!");
+  } catch (e) {
+    alert("تعذر حفظ الملف. جرّب استخدام ملف أصغر.");
+  }
+}
+
+// تحديث تلقائي لو تغيرت الأسئلة من تبويب آخر
+window.addEventListener("storage", function (e) {
+  if (e.key === "digitalProjectQuestions") {
+    questions = loadQuestions();
+    if (currentIndex >= questions.length) currentIndex = 0;
+    answersLog = [];
+    renderQuestion();
+  }
+});
+
+document.getElementById("year").textContent = new Date().getFullYear();
+renderQuestion();
+</script>
+</body>
+</html>
